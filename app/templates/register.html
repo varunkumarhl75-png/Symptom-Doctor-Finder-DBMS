@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient registration | MediFind AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="results-page">
+    <header class="topbar results-topbar">
+        <div class="container nav-wrap">
+            <div class="brand-wrap"><div class="brand-mark">M</div><span>MediFind AI</span></div>
+            <div class="nav-actions">{% include "auth_nav.html" %}</div>
+        </div>
+    </header>
+    <main class="results-main">
+        <div class="container confirmation-card">
+            <h1>Create a patient account</h1>
+            <p>Registration creates a patient profile for future bookings.</p>
+            {% if error %}<div class="error-box" role="alert">{{ error }}</div>{% endif %}
+            <form method="POST" action="{{ url_for('register') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="name">Full name</label>
+                    <input id="name" name="name" type="text" maxlength="100" autocomplete="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" maxlength="150" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input id="phone" name="phone" type="tel" maxlength="32" autocomplete="tel" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password (12–128 characters)</label>
+                    <input id="password" name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm password</label>
+                    <input id="confirm_password" name="confirm_password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+                </div>
+                <button class="primary-btn" type="submit">Register</button>
+            </form>
+            <p>Already registered? <a href="{{ url_for('login') }}">Log in</a>.</p>
+        </div>
+    </main>
+</body>
+</html>

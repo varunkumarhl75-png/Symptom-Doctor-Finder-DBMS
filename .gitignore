@@ -1,0 +1,19 @@
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+backups/
+database/backups/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+.vscode/
+
+# Backup files
+*.bak
+*.before_*

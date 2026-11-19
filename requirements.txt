@@ -1,0 +1,7 @@
+Flask>=3.1,<4
+Flask-WTF>=1.2,<2
+mysql-connector-python==9.7.0
+python-dotenv>=1,<2
+redis>=5,<9
+scikit-learn==1.7.2
+sentence-transformers>=3,<7

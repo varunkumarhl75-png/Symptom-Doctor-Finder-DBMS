@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Search Results | MediFind AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="results-page">
+    <header class="topbar results-topbar">
+        <div class="container nav-wrap">
+            <div class="brand-wrap">
+                <div class="brand-mark">M</div>
+                <span>MediFind AI</span>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
+                    <span class="theme-icon">☀️</span>
+                    <span class="theme-text">Light</span>
+                </button>
+                <a class="nav-cta" href="/">Back to Search</a>
+                {% include "auth_nav.html" %}
+            </div>
+        </div>
+    </header>
+
+    <main class="results-main">
+        <div class="container results-container">
+            <section class="results-header">
+                <div>
+                    <span class="section-kicker">Results</span>
+                    <h1>Doctor Search Results</h1>
+                </div>
+                <a href="/" class="btn btn-secondary">Try another search</a>
+            </section>
+
+            <section class="query-card">
+                <p class="label">Your symptoms</p>
+                <h2>{{ symptoms }}</h2>
+            </section>
+
+            <section class="semantic-card">
+                <div class="section-title-row">
+                    <h3>AI Semantic Match</h3>
+                    <span class="badge accent">{{ '%.2f' | format(similarity_score * 100) }}%</span>
+                </div>
+
+                <div class="semantic-grid">
+                    <div>
+                        <p class="label">Closest stored symptom example</p>
+                        <p class="matched-text">{{ matched_symptom }}</p>
+                    </div>
+                    <div>
+                        <p class="label">Query-to-example cosine similarity</p>
+                        <div class="score-wrap">
+                            <strong>{{ '%.2f' | format(similarity_score * 100) }}%</strong>
+                            <div class="progress-bar">
+                                <span style="width: {{ (similarity_score * 100) | round(2) }}%"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="specialist-section">
+                <div class="section-title-row">
+                    <h3>Recommended Specialists</h3>
+                </div>
+
+                {% if specialist_groups %}
+                    {% for group in specialist_groups %}
+                        <div class="specialist-card">
+                            <div class="specialist-header">
+                                <h4>{{ group.specialization | upper }}</h4>
+                                <span class="similarity-chip">{{ '%.2f' | format(group.similarity_score * 100) }}% stored symptom-specialization association score</span>
+                            </div>
+
+                            <div class="doctor-grid">
+                                {% for doctor in group.doctors %}
+                                    <article class="doctor-card">
+                                        <div class="doctor-avatar">{{ doctor.doctor_name.split() | map('first') | join('') | upper }}</div>
+                                        <div class="doctor-info">
+                                            <h5>{{ doctor.doctor_name }}</h5>
+                                            <div class="doctor-tag">{{ group.specialization }}</div>
+                                            <p><strong>Qualification:</strong> {{ doctor.qualification }}</p>
+                                            <p><strong>Experience:</strong> {{ doctor.experience_years }} years</p>
+                                            <p><strong>Clinic:</strong> {{ doctor.clinic_name }}</p>
+                                            <p><strong>Phone:</strong> {{ doctor.phone }}</p>
+                                            <div class="semantic-score-badge">Stored symptom-specialization association score: {{ '%.2f' | format(group.similarity_score * 100) }}%</div>
+                                            <a class="nav-cta" href="{{ url_for('book_appointment', doctor_id=doctor.doctor_id) }}">Book Appointment</a>
+                                        </div>
+                                    </article>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <h4>No doctors found for this symptom profile.</h4>
+                        <p>Try a different description of your symptoms to improve the semantic match.</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <div class="disclaimer-box results-disclaimer">
+                This application provides informational doctor-discovery assistance and does not provide medical diagnosis or emergency medical advice.
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const themeToggle = document.querySelector('.theme-toggle');
+        const THEME_KEY = 'medifind-theme';
+
+        function applyTheme(theme) {
+            const isDark = theme === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            themeToggle.setAttribute('aria-pressed', String(isDark));
+            themeToggle.querySelector('.theme-icon').textContent = isDark ? '🌙' : '☀️';
+            themeToggle.querySelector('.theme-text').textContent = isDark ? 'Dark' : 'Light';
+        }
+
+        const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+        applyTheme(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const nextTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem(THEME_KEY, nextTheme);
+            applyTheme(nextTheme);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin dashboard | MediFind AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="results-page">
+    <header class="topbar results-topbar">
+        <div class="container nav-wrap">
+            <div class="brand-wrap"><div class="brand-mark">M</div><span>MediFind AI</span></div>
+            <div class="nav-actions">
+                <a class="nav-cta" href="/">Search</a>
+                {% include "auth_nav.html" %}
+            </div>
+        </div>
+    </header>
+    <main class="results-main">
+        <div class="container">
+            <section class="booking-header">
+                <div>
+                    <span class="section-kicker">Administration</span>
+                    <h1>Admin dashboard</h1>
+                </div>
+            </section>
+            {% if error %}
+                <div class="error-box" role="alert">{{ error }}</div>
+            {% elif stats %}
+                <div class="semantic-grid">
+                    <div class="summary-card"><p class="label">Patients</p><h2>{{ stats.patient_count }}</h2></div>
+                    <div class="summary-card"><p class="label">Doctors</p><h2>{{ stats.doctor_count }}</h2></div>
+                    <div class="summary-card"><p class="label">Appointments</p><h2>{{ stats.appointment_count }}</h2></div>
+                    <div class="summary-card"><p class="label">Available future slots</p><h2>{{ stats.available_slot_count }}</h2></div>
+                </div>
+                <p class="disclaimer-box">This dashboard shows aggregate counts only; patient records and appointment details are not exposed here.</p>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>

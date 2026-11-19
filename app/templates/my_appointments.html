@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Appointments | MediFind AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="results-page">
+    <header class="topbar results-topbar">
+        <div class="container nav-wrap">
+            <div class="brand-wrap">
+                <div class="brand-mark">M</div>
+                <span>MediFind AI</span>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
+                    <span class="theme-icon">☀️</span>
+                    <span class="theme-text">Light</span>
+                </button>
+                <a class="nav-cta" href="/">Back to Search</a>
+                {% include "auth_nav.html" %}
+            </div>
+        </div>
+    </header>
+
+    <main class="results-main">
+        <div class="container">
+            <section class="booking-header">
+                <div>
+                    <span class="section-kicker">Appointments</span>
+                    <h1>My Appointments</h1>
+                </div>
+                <a href="/" class="btn btn-secondary">Find More Doctors</a>
+            </section>
+
+            {% if error %}
+                <div class="error-box" role="alert">{{ error }}</div>
+            {% endif %}
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="{% if category == 'error' %}error-box{% else %}success-box{% endif %}" role="status">{{ message }}</div>
+                {% endfor %}
+            {% endwith %}
+
+            <div class="selected-patient-box">
+                Signed in as <strong>{{ patient.patient_name }}</strong> ({{ patient.email }})
+            </div>
+
+            {% if appointments %}
+                <div class="appointments-table-wrap">
+                    <table class="appointments-table">
+                        <thead>
+                            <tr>
+                                <th>Appointment ID</th>
+                                <th>Doctor</th>
+                                <th>Specialization</th>
+                                <th>Clinic</th>
+                                <th>Date</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in appointments %}
+                                <tr>
+                                    <td>#{{ appointment.appointment_id }}</td>
+                                    <td>{{ appointment.doctor_name }}</td>
+                                    <td>{{ appointment.specialization }}</td>
+                                    <td>{{ appointment.clinic_name }}</td>
+                                    <td>{{ appointment.slot_date }}</td>
+                                    <td>{{ appointment.start_time }}</td>
+                                    <td>{{ appointment.end_time }}</td>
+                                    <td>
+                                        <span class="status-pill status-{{ appointment.status | lower }}">{{ appointment.status }}</span>
+                                    </td>
+                                    <td>{{ appointment.notes or '-' }}</td>
+                                    <td>
+                                        {% if appointment.status == 'BOOKED' %}
+                                            <form method="POST" action="{{ url_for('cancel_appointment', appointment_id=appointment.appointment_id) }}" onsubmit="return confirm('Cancel this appointment?');">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="cancel-btn">Cancel Appointment</button>
+                                            </form>
+                                        {% elif appointment.status == 'CANCELLED' %}
+                                            <span class="cancelled-text">Cancelled</span>
+                                        {% elif appointment.status == 'COMPLETED' %}
+                                            <span>Completed — cannot cancel</span>
+                                        {% else %}
+                                            <span>Cancellation unavailable</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% elif not error %}
+                <div class="empty-state">
+                    <h4>No appointments found for your account.</h4>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <script>
+        const themeToggle = document.querySelector('.theme-toggle');
+        const THEME_KEY = 'medifind-theme';
+
+        function applyTheme(theme) {
+            const isDark = theme === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            themeToggle.setAttribute('aria-pressed', String(isDark));
+            themeToggle.querySelector('.theme-icon').textContent = isDark ? '🌙' : '☀️';
+            themeToggle.querySelector('.theme-text').textContent = isDark ? 'Dark' : 'Light';
+        }
+
+        const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+        applyTheme(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const nextTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem(THEME_KEY, nextTheme);
+            applyTheme(nextTheme);
+        });
+    </script>
+</body>
+</html>

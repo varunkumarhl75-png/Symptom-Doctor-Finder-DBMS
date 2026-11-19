@@ -1,0 +1,15 @@
+{% if auth_user %}
+    {% if auth_user.role == 'ADMIN' %}
+        <a class="nav-cta" href="{{ url_for('admin_dashboard') }}">Admin dashboard</a>
+    {% else %}
+        <a class="nav-cta" href="{{ url_for('my_appointments') }}">My appointments</a>
+    {% endif %}
+    <span class="nav-cta">{{ auth_user.email }}</span>
+    <form method="POST" action="{{ url_for('logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-secondary" type="submit">Log out</button>
+    </form>
+{% else %}
+    <a class="nav-cta" href="{{ url_for('login') }}">Log in</a>
+    <a class="btn btn-secondary" href="{{ url_for('register') }}">Register</a>
+{% endif %}

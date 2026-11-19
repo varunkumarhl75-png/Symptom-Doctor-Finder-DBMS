@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment | MediFind AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="results-page">
+    <header class="topbar results-topbar">
+        <div class="container nav-wrap">
+            <div class="brand-wrap">
+                <div class="brand-mark">M</div>
+                <span>MediFind AI</span>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
+                    <span class="theme-icon">☀️</span>
+                    <span class="theme-text">Light</span>
+                </button>
+                <a class="nav-cta" href="/">Back to Search</a>
+                {% include "auth_nav.html" %}
+            </div>
+        </div>
+    </header>
+
+    <main class="results-main">
+        <div class="container booking-container">
+            <section class="booking-header">
+                <div>
+                    <span class="section-kicker">Appointment booking</span>
+                    <h1>Book an Appointment</h1>
+                </div>
+                <a href="/my-appointments" class="btn btn-secondary">View My Appointments</a>
+            </section>
+
+            <div class="booking-summary">
+                <div class="summary-card">
+                    <p class="label">Doctor</p>
+                    <h3>{{ doctor.doctor_name }}</h3>
+                    <p>{{ doctor.specialization }}</p>
+                    <p>{{ doctor.qualification }}</p>
+                    <p>{{ doctor.experience_years }} years experience</p>
+                    <p>{{ doctor.clinic_name }}</p>
+                </div>
+            </div>
+
+            {% if error %}
+                <div class="error-box" role="alert">{{ error }}</div>
+            {% endif %}
+
+            <div class="booking-form">
+                <form method="GET" action="{{ url_for('book_appointment', doctor_id=doctor.doctor_id) }}" class="slot-date-form">
+                    <div class="form-group">
+                        <label for="appointment_date">Appointment date</label>
+                        <input id="appointment_date" name="appointment_date" type="date" min="{{ today }}" value="{{ selected_date or '' }}" required>
+                        <button type="submit" class="btn btn-secondary">Load available slots</button>
+                    </div>
+                </form>
+
+                <form method="POST" action="{{ url_for('book_appointment', doctor_id=doctor.doctor_id) }}" class="booking-submit-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="appointment_date" value="{{ selected_date or '' }}">
+                    <p class="selected-patient-box">
+                        Booking as <strong>{{ patient.patient_name }}</strong> ({{ patient.email }})
+                    </p>
+
+                    <div class="form-group">
+                        <label for="slot_id">Available time slots</label>
+                        {% if available_slots %}
+                            <div class="slot-grid">
+                                {% for slot in available_slots %}
+                                    <label class="slot-option">
+                                        <input type="radio" name="slot_id" value="{{ slot.slot_id }}" required>
+                                        <span>{{ slot.start_time }} - {{ slot.end_time }}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        {% elif not error %}
+                            <div class="empty-state small-empty">
+                                <p>No available slots for this date.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="primary-btn">Confirm Booking</button>
+                        <a href="/" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const themeToggle = document.querySelector('.theme-toggle');
+        const THEME_KEY = 'medifind-theme';
+
+        function applyTheme(theme) {
+            const isDark = theme === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            themeToggle.setAttribute('aria-pressed', String(isDark));
+            themeToggle.querySelector('.theme-icon').textContent = isDark ? '🌙' : '☀️';
+            themeToggle.querySelector('.theme-text').textContent = isDark ? 'Dark' : 'Light';
+        }
+
+        const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+        applyTheme(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const nextTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem(THEME_KEY, nextTheme);
+            applyTheme(nextTheme);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediFind AI | Symptom Doctor Finder</title>
+    <meta name="description" content="AI-powered symptom matching to discover relevant medical specialists and doctors.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="container nav-wrap">
+            <div class="brand-wrap">
+                <div class="brand-mark">M</div>
+                <span>MediFind AI</span>
+            </div>
+            <nav class="main-nav" aria-label="Primary navigation">
+                <a href="#home">Home</a>
+                <a href="#search">Find a Doctor</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#about">About</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
+                    <span class="theme-icon">☀️</span>
+                    <span class="theme-text">Light</span>
+                </button>
+                <a class="nav-cta" href="#search">Find a Doctor</a>
+                {% include "auth_nav.html" %}
+            </div>
+        </div>
+    </header>
+
+    <main id="home">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="container">
+                    <div class="{% if category == 'error' %}error-box{% else %}success-box{% endif %}" role="status">{{ message }}</div>
+                </div>
+            {% endfor %}
+        {% endwith %}
+        <section class="hero">
+            <div class="container hero-inner">
+                <div class="hero-copy">
+                    <span class="eyebrow">Healthcare intelligence</span>
+                    <h1>Find the Right Doctor<br>From the Way You Describe Your Symptoms.</h1>
+                    <p>
+                        Describe what you're experiencing in your own words. Our AI-powered semantic search connects your symptoms with relevant medical specialists and doctors.
+                    </p>
+
+                    <div class="search-panel" id="search">
+                        <form method="POST" action="/search" id="searchForm">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <label for="symptoms" class="sr-only">Describe your symptoms</label>
+                            <textarea id="symptoms" name="symptoms" placeholder="Describe your symptoms naturally..." required>{{ symptoms or '' }}</textarea>
+                            <p class="example-text">Example: I've been having chest tightness and difficulty breathing when I walk.</p>
+
+                            {% if error %}
+                                <div class="error-box" role="alert">{{ error }}</div>
+                            {% endif %}
+
+                            <button type="submit" class="primary-btn" id="submitButton">
+                                <span class="button-label">Find Doctors</span>
+                                <span class="spinner hidden" aria-hidden="true"></span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="history-box">
+                        <div class="history-header">
+                            <span>Recent searches</span>
+                            <button type="button" class="ghost-btn" id="clearHistory">Clear</button>
+                        </div>
+                        <div id="searchHistory" class="search-history"></div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="mini-card">
+                        <div class="mini-header">
+                            <span class="dot success"></span>
+                            <span>Semantic match</span>
+                        </div>
+                        <h3>Chest tightness + shortness of breath</h3>
+                        <div class="match-meter">
+                            <div class="meter-fill" style="width: 86%"></div>
+                        </div>
+                        <p>Best match: <strong>Cardiology</strong></p>
+                    </div>
+                    <div class="mini-note">
+                        <span class="badge">AI-Powered</span>
+                        <p>Natural-language symptom understanding, without rigid keyword matching.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="feature-section">
+            <div class="container">
+                <div class="section-heading">
+                    <span class="section-kicker">Why patients use MediFind</span>
+                    <h2>Clearer symptom understanding, better specialist discovery.</h2>
+                </div>
+
+                <div class="feature-grid">
+                    <article class="feature-card">
+                        <div class="feature-icon">01</div>
+                        <h3>Natural Language Search</h3>
+                        <p>Describe your symptoms in your own words.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon">02</div>
+                        <h3>Semantic AI Matching</h3>
+                        <p>Understand meaning rather than relying only on exact keywords.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon">03</div>
+                        <h3>Specialist Discovery</h3>
+                        <p>Find relevant medical specializations and doctors.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon">04</div>
+                        <h3>Doctor Information</h3>
+                        <p>View qualifications, experience, clinics and contact information.</p>
+                    </article>
+                </div>
+
+                <div class="disclaimer-box">
+                    This application provides informational doctor-discovery assistance and does not provide medical diagnosis or emergency medical advice.
+                </div>
+            </div>
+        </section>
+
+        <section class="steps-section" id="how-it-works">
+            <div class="container">
+                <div class="section-heading center">
+                    <span class="section-kicker">How it works</span>
+                    <h2>Three simple steps to find the right specialist.</h2>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <span class="step-number">01</span>
+                        <h3>Describe</h3>
+                        <p>Tell us what you're experiencing.</p>
+                    </div>
+                    <div class="step-card">
+                        <span class="step-number">02</span>
+                        <h3>Understand</h3>
+                        <p>AI compares the meaning of your description with the symptom knowledge stored in the system.</p>
+                    </div>
+                    <div class="step-card">
+                        <span class="step-number">03</span>
+                        <h3>Discover</h3>
+                        <p>View relevant specializations and available doctors.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section" id="about">
+            <div class="container about-box">
+                <div>
+                    <span class="section-kicker">About</span>
+                    <h2>Built for modern healthcare discovery.</h2>
+                </div>
+                <p>
+                    MediFind AI helps patients describe symptoms naturally and connects them with relevant specialists stored in the database using semantic similarity and medical specialty relationships.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='search_history.js') }}"></script>
+    <script>
+        const form = document.getElementById('searchForm');
+        const button = document.getElementById('submitButton');
+        const buttonLabel = button.querySelector('.button-label');
+        const spinner = button.querySelector('.spinner');
+        const symptomsInput = document.getElementById('symptoms');
+        const historyBox = document.getElementById('searchHistory');
+        const clearHistoryButton = document.getElementById('clearHistory');
+        const themeToggle = document.querySelector('.theme-toggle');
+
+        const STORAGE_KEY = 'medifind-search-history';
+        const THEME_KEY = 'medifind-theme';
+
+        function applyTheme(theme) {
+            const isDark = theme === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            themeToggle.setAttribute('aria-pressed', String(isDark));
+            themeToggle.querySelector('.theme-icon').textContent = isDark ? '🌙' : '☀️';
+            themeToggle.querySelector('.theme-text').textContent = isDark ? 'Dark' : 'Light';
+        }
+
+        const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+        applyTheme(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const nextTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem(THEME_KEY, nextTheme);
+            applyTheme(nextTheme);
+        });
+
+        function getHistory() {
+            try {
+                const history = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                return Array.isArray(history)
+                    ? history.filter(item => typeof item === 'string').slice(0, 5)
+                    : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function saveHistory(query) {
+            const trimmed = query.trim();
+            if (!trimmed) return;
+
+            const history = getHistory();
+            const updated = [trimmed, ...history.filter(item => item !== trimmed)].slice(0, 5);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            renderSearchHistory(getHistory(), historyBox, query => {
+                symptomsInput.value = query;
+                form.requestSubmit();
+            });
+        }
+
+        form.addEventListener('submit', function () {
+            const text = symptomsInput.value.trim();
+            if (!text) {
+                return;
+            }
+
+            button.disabled = true;
+            buttonLabel.textContent = 'Understanding your symptoms...';
+            spinner.classList.remove('hidden');
+            saveHistory(text);
+        });
+
+        clearHistoryButton.addEventListener('click', () => {
+            localStorage.removeItem(STORAGE_KEY);
+            renderHistory();
+        });
+
+        renderHistory();
+    </script>
+</body>
+</html>

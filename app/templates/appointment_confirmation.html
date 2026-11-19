@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Confirmation | MediFind AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="results-page">
+    <header class="topbar results-topbar">
+        <div class="container nav-wrap">
+            <div class="brand-wrap">
+                <div class="brand-mark">M</div>
+                <span>MediFind AI</span>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
+                    <span class="theme-icon">☀️</span>
+                    <span class="theme-text">Light</span>
+                </button>
+                <a class="nav-cta" href="/">Back to Search</a>
+                {% include "auth_nav.html" %}
+            </div>
+        </div>
+    </header>
+
+    <main class="results-main">
+        <div class="container confirmation-container">
+            <section class="confirmation-card">
+                <div class="success-badge">Appointment Booked Successfully</div>
+                <h1>Appointment Booked Successfully</h1>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Appointment ID</span>
+                        <strong>#{{ appointment.appointment_id }}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Patient</span>
+                        <strong>{{ appointment.patient_name }}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Doctor</span>
+                        <strong>{{ appointment.doctor_name }}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Specialization</span>
+                        <strong>{{ appointment.specialization }}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Clinic</span>
+                        <strong>{{ appointment.clinic_name }}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Appointment date</span>
+                        <strong>{{ appointment.appointment_date }}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Start time</span>
+                        <strong>{{ appointment.start_time }}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">End time</span>
+                        <strong>{{ appointment.end_time }}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <strong>{{ appointment.status }}</strong>
+                    </div>
+                </div>
+
+                <div class="form-actions confirmation-actions">
+                    <a href="/" class="btn btn-secondary">Back to Search</a>
+                    <a href="{{ url_for('my_appointments') }}" class="primary-btn">View My Appointments</a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const themeToggle = document.querySelector('.theme-toggle');
+        const THEME_KEY = 'medifind-theme';
+
+        function applyTheme(theme) {
+            const isDark = theme === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            themeToggle.setAttribute('aria-pressed', String(isDark));
+            themeToggle.querySelector('.theme-icon').textContent = isDark ? '🌙' : '☀️';
+            themeToggle.querySelector('.theme-text').textContent = isDark ? 'Dark' : 'Light';
+        }
+
+        const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+        applyTheme(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const nextTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem(THEME_KEY, nextTheme);
+            applyTheme(nextTheme);
+        });
+    </script>
+</body>
+</html>

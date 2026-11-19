@@ -1,0 +1,107 @@
+erDiagram
+    CLINIC {
+        INT clinic_id PK
+        VARCHAR name
+        VARCHAR address
+        VARCHAR phone
+        VARCHAR email
+    }
+
+    SPECIALIZATION {
+        INT specialization_id PK
+        VARCHAR name UK
+        TEXT description
+    }
+
+    DOCTOR {
+        INT doctor_id PK
+        INT clinic_id FK
+        INT specialization_id FK
+        VARCHAR name
+        VARCHAR email UK
+        VARCHAR phone
+        VARCHAR qualification
+        INT experience_years
+    }
+
+    PATIENT {
+        INT patient_id PK
+        VARCHAR name
+        VARCHAR email UK
+        VARCHAR phone
+        DATE date_of_birth
+        VARCHAR gender
+        VARCHAR address
+        DATETIME created_at
+    }
+
+    %% Defined in database/15_authentication.sql; presence in live MySQL is unverified.
+    AUTH_USER {
+        INT user_id PK
+        VARCHAR email UK
+        VARCHAR password_hash
+        VARCHAR role
+        INT patient_id FK, UK "NULL for ADMIN"
+        DATETIME created_at
+    }
+
+    APPOINTMENT_SLOT {
+        INT slot_id PK
+        INT doctor_id FK
+        DATE slot_date
+        TIME start_time
+        TIME end_time
+    }
+
+    APPOINTMENT {
+        INT appointment_id PK
+        INT patient_id FK
+        INT slot_id FK
+        VARCHAR status
+        INT active_slot_id UK "Generated: NULL when CANCELLED, else slot_id"
+        DATETIME booked_at
+        TEXT notes
+    }
+
+    SYMPTOM_SEARCH {
+        INT search_id PK
+        INT patient_id FK
+        TEXT symptom_text
+        DATETIME search_date
+    }
+
+    SYMPTOM_SPECIALIZATION {
+        INT search_id PK, FK
+        INT specialization_id PK, FK
+        DECIMAL similarity_score
+    }
+
+    CONSULTATION {
+        INT consultation_id PK
+        INT appointment_id FK, UK
+        TEXT diagnosis
+        TEXT notes
+        DATETIME consultation_date
+        DATE follow_up_date
+    }
+
+    PRESCRIPTION {
+        INT prescription_id PK
+        INT consultation_id FK
+        VARCHAR medicine_name
+        VARCHAR dosage
+        VARCHAR duration
+        TEXT instructions
+    }
+
+    CLINIC ||--o{ DOCTOR : employs
+    SPECIALIZATION ||--o{ DOCTOR : classifies
+    PATIENT ||--o| AUTH_USER : account
+    DOCTOR ||--o{ APPOINTMENT_SLOT : offers
+    PATIENT ||--o{ APPOINTMENT : makes
+    APPOINTMENT_SLOT ||--o{ APPOINTMENT : has_history
+    PATIENT ||--o{ SYMPTOM_SEARCH : submits
+    SYMPTOM_SEARCH ||--o{ SYMPTOM_SPECIALIZATION : maps
+    SPECIALIZATION ||--o{ SYMPTOM_SPECIALIZATION : maps
+    APPOINTMENT ||--o| CONSULTATION : has
+    CONSULTATION ||--o{ PRESCRIPTION : includes
